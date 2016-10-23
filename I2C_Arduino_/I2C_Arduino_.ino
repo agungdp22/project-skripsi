@@ -57,16 +57,15 @@ void receiveData(int byteCount){
  
   if (dataDiterima == 1){
     kirimData = GetSensor1();
-    Serial.print("\t Data yang dikirim ke raspi = ");Serial.println(kirimData);
   }
   else if(dataDiterima == 2) {
-   kirimData = GetSensor2();
-   Serial.print("\t Data yang dikirim ke raspi = ");Serial.println(kirimData);
+    kirimData = GetSensor2();
   }
   else if(dataDiterima == 3){
     kirimData = dataDiterima*1000;
-    Serial.print("\t Data yang dikirim ke raspi = ");Serial.println(kirimData);
   }
+  
+  Serial.print("\t Data yang dikirim ke raspi = ");Serial.println(kirimData);
   dataTerkirim = kirimData;
  }
 }
