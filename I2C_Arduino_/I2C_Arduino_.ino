@@ -7,16 +7,15 @@
 #define SLAVE_ADDRESS 0x04
 
 int dataDiterima = 0;
-int state = 0;
 int dataTerkirim = 0;
-int sensor = 0;
+int LED = 12;
  
 double temp;
 int sens;
 int kirimData;
  
 void setup() {
- pinMode(13, OUTPUT);
+ pinMode(LED, OUTPUT);
  Serial.begin(9600);
  
  // initialize i2c as slave
@@ -28,8 +27,26 @@ void setup() {
 }
  
 void loop(){
- delay(100);
- temp = GetTemp(); // get suhu internal arduino
+  temp = GetTemp(); // get suhu internal arduino
+  
+  if(dataDiterima == 1){
+    sens = GetSensor1(); // baca data sensor LDR
+    Serial.print("Sensor 1 = ");Serial.println(sens);
+    if(sens < 900){
+      digitalWrite(13,HIGH);
+    }else{
+      digitalWrite(13,LOW);
+    }
+  }else if(dataDiterima == 2){
+    sens = GetSensor2(); // baca data resistivitas yang sedang diukur
+    Serial.print("Sensor 2 = ");Serial.println(sens);
+  }else if(dataDiterima == 3){
+    sens = GetSensor3(); // null
+    Serial.print("Sensor 3 = ");Serial.println(sens);
+  }
+  
+  aksi(dataDiterima);
+  delay(1000);
 }
  
 // menerima data dari raspberry pi
@@ -39,24 +56,12 @@ void receiveData(int byteCount){
   Serial.print("Data yang diterima dari raspi = ");Serial.print(dataDiterima);
  
   if (dataDiterima == 1){
-    kirimData = 255;
+    kirimData = GetSensor1();
     Serial.print("\t Data yang dikirim ke raspi = ");Serial.println(kirimData);
-    if (state == 0){
-      digitalWrite(13, HIGH);
-      state = 1;
-    } else{
-      digitalWrite(13, LOW);
-      state = 0;
-    }
   }
   else if(dataDiterima == 2) {
-   kirimData = GetSensorLDR();
+   kirimData = GetSensor2();
    Serial.print("\t Data yang dikirim ke raspi = ");Serial.println(kirimData);
-   if(kirimData < 900){
-      digitalWrite(13,HIGH);
-    }else{
-      digitalWrite(13,LOW);
-    }
   }
   else if(dataDiterima == 3){
     kirimData = dataDiterima*1000;
@@ -85,16 +90,23 @@ double GetTemp(void){
  return (t);
 }
 
-int GetSensorLDR(){
-  sensor = analogRead(A0);
-  return (sensor);
+int GetSensor1(){
+  int sensor1 = analogRead(A0); // pin A0 terhubung pada sensor LDR
+  return (sensor1);
 }
-void nomor3(){
-  dataDiterima = dataDiterima + 9;
-  for(int i=0;i<dataDiterima;i++){
-    digitalWrite(13,HIGH);
+int GetSensor2(){
+  int sensor2 = analogRead(A1); // pin A1 terhubung ke modul pembaca resistivitas
+  return (sensor2);
+}
+int GetSensor3(){
+  int sensor3 = analogRead(A1);
+  return (sensor3);
+}
+void aksi(int data){
+  for(int i=0;i<data;i++){
+    digitalWrite(LED,HIGH);
     delay(200);
-    digitalWrite(13,LOW);
+    digitalWrite(LED,LOW);
     delay(200);
   }
 }
