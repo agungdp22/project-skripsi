@@ -13,10 +13,17 @@ int LED = 12;
 double temp;
 int sens;
 int kirimData;
+int s[4] = {2,3,4,5};
+int aktifMultiplex=6;
  
 void setup() {
- pinMode(LED, OUTPUT);
  Serial.begin(9600);
+ pinMode(LED, OUTPUT);
+ for(int k=0;k<4;k++){
+  pinMode(s[k], OUTPUT);
+ }
+ pinMode(aktifMultiplex, OUTPUT);
+ digitalWrite(aktifMultiplex,LOW);
  
  // initialize i2c as slave
  Wire.begin(SLAVE_ADDRESS);
@@ -46,6 +53,7 @@ void loop(){
   }
   
   aksi(dataDiterima);
+  multiplex(dataDiterima);
   delay(1000);
 }
  
@@ -109,8 +117,20 @@ void aksi(int data){
     delay(200);
   }
 }
+
+// mengontrol sinyal yang lewat pada multiplexer
+void multiplex(int chanel){
+  int bits;
+  for(int i=0;i<4;i++){
+    bits = chanel%2;
+    chanel =(int) chanel/2;
+    digitalWrite(s[i],bits);
+  }
+}
+
 /*
  * Agung Dwi Prasetyo
  * G64130073
+ * cs.ipb.ac.id
  */
 
