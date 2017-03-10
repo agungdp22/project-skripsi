@@ -1,21 +1,17 @@
-/*
- * I2C yaitu media untuk komunikasi antara arduino pada pin A4 dan A5, dengan raspberry pi pada GPIO 02(pin 03) dan GPIO 03(pin 05)
- */
-
 #include <Wire.h>
- 
+
 #define SLAVE_ADDRESS 0x04
 
 int dataDiterima = 0;
 int dataTerkirim = 0;
 int LED = 12;
- 
+
 double temp;
 int sens;
 int kirimData;
 int s[4] = {2,3,4,5};
 int aktifMultiplex=6;
- 
+
 void setup() {
  Serial.begin(9600);
  pinMode(LED, OUTPUT);
@@ -24,20 +20,20 @@ void setup() {
  }
  pinMode(aktifMultiplex, OUTPUT);
  digitalWrite(aktifMultiplex,LOW);
- 
+
  // initialize i2c as slave
  Wire.begin(SLAVE_ADDRESS);
- 
+
  // define callbacks for i2c communication
  Wire.onReceive(receiveData);
  Wire.onRequest(sendData);
 }
- 
+
 void loop(){
   temp = GetTemp(); // get suhu internal arduino
-  
+
   if(dataDiterima == 1){
-    sens = GetSensor1(); // baca data sensor LDR
+    sens = GetSensor1(); // read LDR
     Serial.print("Sensor 1 = ");Serial.println(sens);
     if(sens < 900){
       digitalWrite(13,HIGH);
@@ -51,18 +47,18 @@ void loop(){
     sens = GetSensor3(); // null
     Serial.print("Sensor 3 = ");Serial.println(sens);
   }
-  
+
   aksi(dataDiterima);
   multiplex(dataDiterima);
   delay(1000);
 }
- 
-// menerima data dari raspberry pi
+
+// receive data dari raspberry pi
 void receiveData(int byteCount){
  while(Wire.available()) {
   dataDiterima = Wire.read();
   Serial.print("Data yang diterima dari raspi = ");Serial.print(dataDiterima);
- 
+
   if (dataDiterima == 1){
     kirimData = GetSensor1();
   }
@@ -72,17 +68,17 @@ void receiveData(int byteCount){
   else if(dataDiterima == 3){
     kirimData = dataDiterima*1000;
   }
-  
+
   Serial.print("\t Data yang dikirim ke raspi = ");Serial.println(kirimData);
   dataTerkirim = kirimData;
  }
 }
- 
-// mengirim data ke raspberry pi
+
+// send data ke raspberry pi
 void sendData(){
  Wire.write(dataTerkirim);
 }
- 
+
 // Get the internal temperature of the arduino
 double GetTemp(void){
  unsigned int wADC;
@@ -98,11 +94,11 @@ double GetTemp(void){
 }
 
 int GetSensor1(){
-  int sensor1 = analogRead(A0); // pin A0 terhubung pada sensor LDR
+  int sensor1 = analogRead(A0); // LDR
   return (sensor1);
 }
 int GetSensor2(){
-  int sensor2 = analogRead(A1); // pin A1 terhubung ke modul pembaca resistivitas
+  int sensor2 = analogRead(A1); // resistivitas
   return (sensor2);
 }
 int GetSensor3(){
@@ -133,4 +129,3 @@ void multiplex(int chanel){
  * G64130073
  * cs.ipb.ac.id
  */
-
