@@ -43,8 +43,8 @@ void loop(){
     for (int i = 2; i < 15; i++) { // i = kutub positif tegangan
         delay(2000);
         int j=i+1;                 // j = kutub negatif tegangan
-        multiplex(1, i);           // multiplexer 1 handle kutub positif tegangan
-        multiplex(2, j);           // multiplexer 2 handle kutub negatif tegangan
+        multiplex(0, i);           // multiplexer 1 handle kutub positif tegangan
+        multiplex(1, j);           // multiplexer 2 handle kutub negatif tegangan
         volt = getVoltage();
         //Serial.print(j);Serial.print(" ");Serial.println(i);
         Serial.println(volt,5);
