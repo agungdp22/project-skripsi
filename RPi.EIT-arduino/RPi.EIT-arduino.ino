@@ -14,8 +14,8 @@ int sens;
 int kirimData;
 
 // init pin multiplexer output
-int mul[4][4] = {{22,23,24,25},{26,27,28,29},{30,31,32,33},{34,35,36,37}}; // pin s0,s1,s2,s3 all multiplexer
-int ENMul[4] = {38,39,40,41};    // port EN all multiplexer
+int mux[4][4] = {{22,23,24,25},{26,27,28,29},{30,31,32,33},{34,35,36,37}}; // pin s0,s1,s2,s3 all multiplexer
+int ENMux[4] = {38,39,40,41};    // port EN all multiplexer
 
 float volt = 0.0;
 
@@ -23,9 +23,9 @@ void setup() {
     Serial.begin(9600);
     for(int k=0;k<4;k++){
         for(int l=0;l<4;l++){
-            pinMode(mul[k][l], OUTPUT);
+            pinMode(mux[k][l], OUTPUT);
         }
-        digitalWrite(ENMul[k],LOW);
+        digitalWrite(ENMux[k],LOW);
     }
 
     // Communication dgn Raspi
@@ -38,17 +38,9 @@ void setup() {
 }
 
 void loop(){
-//    scanEIT();
-// masih ambil data per baris
-    for (int i = 2; i < 15; i++) { // i = kutub positif tegangan
-        delay(2000);
-        int j=i+1;                 // j = kutub negatif tegangan
-        multiplex(0, i);           // multiplexer 1 handle kutub positif tegangan
-        multiplex(1, j);           // multiplexer 2 handle kutub negatif tegangan
-        volt = getVoltage();
-        //Serial.print(j);Serial.print(" ");Serial.println(i);
-        Serial.println(volt,5);
-    }
+    scanEITfull();
+//    scanEITrow();
+
     Serial.println("end data\n");
     delay(4000);
 }
@@ -92,8 +84,8 @@ double GetTemp(void){
 
 // -------------------------------------- EIT SECTION ---------------------------------------------
 
-// get data EIT (matrix 16x13), metode tetangga
-void scanEIT(){
+// get full data EIT (matrix 16x13), metode tetangga
+void scanEITfull(){
     // init elektroda pertama
     int aPos = 1; // kutub positif arus injeksi
     int aNeg = 0; // kutub negatif arus injeksi
@@ -130,6 +122,19 @@ void scanEIT(){
     }
 }
 
+// get data volt per baris
+void scanEITrow(){
+    for (int i = 2; i < 15; i++) { // i = kutub positif tegangan
+        delay(2000);
+        int j=i+1;                 // j = kutub negatif tegangan
+        multiplex(0, i);           // multiplexer 1 handle kutub positif tegangan
+        multiplex(1, j);           // multiplexer 2 handle kutub negatif tegangan
+        volt = getVoltage();
+        //Serial.print(j);Serial.print(" ");Serial.println(i);
+        Serial.println(volt,5);
+    }
+}
+
 // get voltage measurement
 float getVoltage(){
     analogReference(INTERNAL1V1); // voltage reference 1.1 volt buat MEGA
@@ -145,7 +150,7 @@ void multiplex(int tipe, int chanel){
         bits = chanel%2;
         chanel =(int) chanel/2;
 
-        digitalWrite(mul[tipe][i], bits);
+        digitalWrite(mux[tipe][i], bits);
     }
     delay(10);
 }
