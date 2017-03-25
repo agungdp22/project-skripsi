@@ -7,6 +7,11 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "socket.io/sio_client.h"
+#include "socket.io/sio_message.h"
+#include "socket.io/sio_socket.h"
+
  
 // The PiWeather board i2c address
 #define ADDRESS 0x04
@@ -15,6 +20,8 @@
 static const char *devName = "/dev/i2c-1";
  
 int main(int argc, char** argv) {
+  sio::client h;
+  h.connect("http://localhost:1993");
  
   if (argc == 1) {
     printf("Supply one or more commands to send to the Arduino\n");
