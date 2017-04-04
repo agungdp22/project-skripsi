@@ -25,14 +25,6 @@ func main() {
 		return
 	}
 	// client.Emit("raspiConnect")
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		data, _, _ := reader.ReadLine()
-		command := string(data)
-		log.Printf(command)
-		client.Emit("message", command)
-		log.Printf("send message:%v\n", command)
-	}
 	client.On("error", func() {
 		log.Printf("on error\n")
 	})
@@ -51,6 +43,21 @@ func main() {
 	client.On("startReconstruction", func(msg string) {
 		log.Printf("masukkk")
 	})
+	client.On("toGo", func() {
+		log.Printf("masuk go")
+	})
+	log.Printf("Listening Sersadsadver...\n")
 
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		client.On("toGo", func() {
+			log.Printf("masuk go")
+		})
+		data, _, _ := reader.ReadLine()
+		command := string(data)
+		log.Printf(command)
+		client.Emit("message", command)
+		log.Printf("send message:%v\n", command)
+	}
 
 }

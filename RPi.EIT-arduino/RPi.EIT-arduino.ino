@@ -38,6 +38,7 @@ void setup() {
 }
 
 void loop(){
+    delay(4000);
     scanEITfull();
 //    scanEITrow();
 
@@ -84,42 +85,67 @@ double GetTemp(void){
 
 // -------------------------------------- EIT SECTION ---------------------------------------------
 
-// get full data EIT (matrix 16x13), metode tetangga
+// get full data EIT (matrix 16x13 = 208 data), metode tetangga
 void scanEITfull(){
     // init elektroda pertama
-    int aPos = 1; // kutub positif arus injeksi
-    int aNeg = 0; // kutub negatif arus injeksi
-    int vPos = 2; // kutub positif ukur tegangan
-    int vNeg = 3; // kutub negatif ukur tegangan
-    
-    for(aNeg, aPos; aNeg<16; aNeg++, aPos++){ // 16 baris 
-        if(aPos==16) aPos=0;
-        Serial.print("Baris(Arus): ");Serial.print(aPos);Serial.print(" ");Serial.println(aNeg);
-        
-        multiplex(2, aPos); // multiplexer 2 handle kutub positif arus injeksi
-        multiplex(3, aNeg); // multiplexer 3 handle kutub negatif arus injeksi
-        
-        for (int i = 0; i < 13; i++) { // get 13 data voltage (13 kolom matrix)
+    int aPos; // kutub positif arus injeksi
+    int aNeg; // kutub negatif arus injeksi
+    int vPos; // kutub positif ukur tegangan
+    int vNeg; // kutub negatif ukur tegangan
+
+    for(int i=0; i<208; i++){
+        if(i%13==0){
+            aNeg=int(i/13);
+            aPos=aNeg+1;
+            if(aPos==16) aPos=0;
+            vPos=aPos+1;
             if(vPos==16) vPos=0;
+            vNeg=vPos+1;
             if(vNeg==16) vNeg=0;
-//            Serial.print(vPos);Serial.print(" ");Serial.println(vNeg);
-            delay(3000);
-
-            multiplex(0, vPos); // multiplexer 0 handle kutub positif tegangan
-            multiplex(1, vNeg); // multiplexer 1 handle kutub negatif tegangan
-            
-            volt = getVoltage();
-            delay(3000);
-
-            Serial.println(volt,5);
-            
+            multiplex(2, aPos);  // multiplexer 2 handle kutub positif arus injeksi
+            multiplex(3, aNeg);  // multiplexer 3 handle kutub negatif arus injeksi
+            Serial.print(aNeg);Serial.print(" ");Serial.println(aPos);
+        }else{
             vPos++;
-            vNeg++;
+            if(vPos==16) vPos=0;
+            vNeg=vPos+1;
+            if(vNeg==16) vNeg=0;
         }
-        vPos=aPos+1;
-        vNeg=vPos+1;
-        Serial.println("\n");
+        multiplex(0, vPos);  // multiplexer 0 handle kutub positif tegangan
+        multiplex(1, vNeg);  // multiplexer 1 handle kutub negatif tegangan
+        volt = getVoltage();
+        Serial.println(volt,5);
+        delay(500);
     }
+    
+//    for(aNeg, aPos; aNeg<16; aNeg++, aPos++){ // 16 baris 
+//        if(aPos==16) aPos=0;
+//        Serial.print("Baris(Arus): ");Serial.print(aPos);Serial.print(" ");Serial.println(aNeg);
+//        
+//        multiplex(2, aPos); // multiplexer 2 handle kutub positif arus injeksi
+//        multiplex(3, aNeg); // multiplexer 3 handle kutub negatif arus injeksi
+//        
+//        for (int i = 0; i < 13; i++) { // get 13 data voltage (13 kolom matrix)
+//            if(vPos==16) vPos=0;
+//            if(vNeg==16) vNeg=0;
+////            Serial.print(vPos);Serial.print(" ");Serial.println(vNeg);
+//            delay(3000);
+//
+//            multiplex(0, vPos); // multiplexer 0 handle kutub positif tegangan
+//            multiplex(1, vNeg); // multiplexer 1 handle kutub negatif tegangan
+//            
+//            volt = getVoltage();
+//            delay(3000);
+//
+//            Serial.println(volt,5);
+//            
+//            vPos++;
+//            vNeg++;
+//        }
+//        vPos=aPos+1;
+//        vNeg=vPos+1;
+//        Serial.println("\n");
+//    }
 }
 
 // get data volt per baris
