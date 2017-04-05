@@ -97,18 +97,26 @@ void scanEITfull(){
         if(i%13==0){
             aNeg=int(i/13);
             aPos=aNeg+1;
+            vPos = 0;
+            vNeg = vPos+1;
             if(aPos==16) aPos=0;
-            vPos=aPos+1;
-            if(vPos==16) vPos=0;
-            vNeg=vPos+1;
-            if(vNeg==16) vNeg=0;
+            if((aNeg==vPos) && (aPos==vNeg)){
+                vPos=2;
+                vNeg=3;
+            }else if((aNeg==vNeg) || (vPos==aPos)) {
+                vPos=aPos+1;
+                vNeg=vPos+1;
+            }
             multiplex(2, aPos);  // multiplexer 2 handle kutub positif arus injeksi
             multiplex(3, aNeg);  // multiplexer 3 handle kutub negatif arus injeksi
             Serial.print(aNeg);Serial.print(" ");Serial.println(aPos);
         }else{
             vPos++;
-            if(vPos==16) vPos=0;
             vNeg=vPos+1;
+            if((vNeg==aNeg)) {
+                vPos=aPos+1;
+                vNeg=vPos+1;
+            }
             if(vNeg==16) vNeg=0;
         }
         multiplex(0, vPos);  // multiplexer 0 handle kutub positif tegangan
@@ -117,35 +125,6 @@ void scanEITfull(){
         Serial.println(volt,5);
         delay(500);
     }
-    
-//    for(aNeg, aPos; aNeg<16; aNeg++, aPos++){ // 16 baris 
-//        if(aPos==16) aPos=0;
-//        Serial.print("Baris(Arus): ");Serial.print(aPos);Serial.print(" ");Serial.println(aNeg);
-//        
-//        multiplex(2, aPos); // multiplexer 2 handle kutub positif arus injeksi
-//        multiplex(3, aNeg); // multiplexer 3 handle kutub negatif arus injeksi
-//        
-//        for (int i = 0; i < 13; i++) { // get 13 data voltage (13 kolom matrix)
-//            if(vPos==16) vPos=0;
-//            if(vNeg==16) vNeg=0;
-////            Serial.print(vPos);Serial.print(" ");Serial.println(vNeg);
-//            delay(3000);
-//
-//            multiplex(0, vPos); // multiplexer 0 handle kutub positif tegangan
-//            multiplex(1, vNeg); // multiplexer 1 handle kutub negatif tegangan
-//            
-//            volt = getVoltage();
-//            delay(3000);
-//
-//            Serial.println(volt,5);
-//            
-//            vPos++;
-//            vNeg++;
-//        }
-//        vPos=aPos+1;
-//        vNeg=vPos+1;
-//        Serial.println("\n");
-//    }
 }
 
 // get data volt per baris
