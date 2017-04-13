@@ -3,6 +3,7 @@
  */
 
 #include <Wire.h>
+#include "MUX74HC4067.h"
 
 #define SLAVE_ADDRESS 0x04
 
@@ -16,17 +17,23 @@ int kirimData;
 // init pin multiplexer output
 int mux[4][4] = {{22,23,24,25},{26,27,28,29},{30,31,32,33},{34,35,36,37}}; // pin s0,s1,s2,s3 all multiplexer
 int ENMux[4] = {38,39,40,41};    // port EN all multiplexer
+MUX74HC4067 mux0(38, 22, 23, 24, 25); // EN, S0, S1, S2, S3
+MUX74HC4067 mux1(39, 26, 27, 28, 29); // EN, S0, S1, S2, S3
+MUX74HC4067 mux2(40, 30, 31, 32, 33); // EN, S0, S1, S2, S3
+MUX74HC4067 mux3(41, 34, 35, 36, 37); // EN, S0, S1, S2, S3
 
 float volt = 0.0;
 
 void setup() {
     Serial.begin(9600);
-    for(int k=0;k<4;k++){
-        for(int l=0;l<4;l++){
-            pinMode(mux[k][l], OUTPUT);
-        }
-        digitalWrite(ENMux[k],LOW);
-    }
+    while(!Serial) ;
+//    for(int k=0;k<4;k++){
+//        for(int l=0;l<4;l++){
+//            pinMode(mux[k][l], OUTPUT);
+//        }
+//        digitalWrite(ENMux[k],LOW);
+//    }
+    mux1.signalPin(A0, INPUT, ANALOG); // vPos
 
     // Communication dgn Raspi
     // initialize i2c as slave
@@ -35,15 +42,6 @@ void setup() {
     // define callbacks for i2c communication
     Wire.onReceive(receiveData);
     Wire.onRequest(sendData);
-}
-
-void loop(){
-    delay(4000);
-    scanEITfull();
-//    scanEITrow();
-
-    Serial.println("end data\n");
-    delay(4000);
 }
 
 // receive data dari raspberry pi
@@ -107,8 +105,10 @@ void scanEITfull(){
                 vPos=aPos+1;
                 vNeg=vPos+1;
             }
-            multiplex(2, aPos);  // multiplexer 2 handle kutub positif arus injeksi
-            multiplex(3, aNeg);  // multiplexer 3 handle kutub negatif arus injeksi
+            mux2.write(aPos, HIGH);
+            mux3.write(aNeg, HIGH);
+            //multiplex(2, aPos);  // multiplexer 2 handle kutub positif arus injeksi
+            //multiplex(3, aNeg);  // multiplexer 3 handle kutub negatif arus injeksi
             Serial.print(aNeg);Serial.print(" ");Serial.println(aPos);
         }else{
             vPos++;
@@ -119,8 +119,10 @@ void scanEITfull(){
             }
             if(vNeg==16) vNeg=0;
         }
-        multiplex(0, vPos);  // multiplexer 0 handle kutub positif tegangan
-        multiplex(1, vNeg);  // multiplexer 1 handle kutub negatif tegangan
+        mux0.write(vPos, HIGH);
+        mux1.write(vNeg, HIGH);
+        //multiplex(0, vPos);  // multiplexer 0 handle kutub positif tegangan
+        //multiplex(1, vNeg);  // multiplexer 1 handle kutub negatif tegangan
         volt = getVoltage();
         Serial.println(volt,5);
         delay(500);
@@ -158,6 +160,17 @@ void multiplex(int tipe, int chanel){
         digitalWrite(mux[tipe][i], bits);
     }
     delay(10);
+}
+
+
+// main function
+void loop(){
+    delay(4000);
+    scanEITfull();
+//    scanEITrow();
+
+    Serial.println("end data\n");
+    delay(4000);
 }
 
 /*
