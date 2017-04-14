@@ -22,7 +22,7 @@ def getData(*args):
 			dataVolt.append(uniform(0.001,0.05))
 			time.sleep(0.02)
 		#print(dataVolt)
-		socketIO.emit('postDataVoltage',{"status":True, "volt":dataVolt})
+		socketIO.emit('postDataVoltage',{"status":True, "volt":dataVolt, "token":args[0]["webToken"]})
 		print("finish")
 	else:
 		print("tokennya ga cocok")
